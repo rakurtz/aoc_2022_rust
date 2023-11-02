@@ -23,7 +23,10 @@ impl RPC {
     }
     fn game_score(&self, oppenent: &RPC) -> u32 {
         // the game's score
-        if *self == *oppenent {
+        // question: in line 27 it seems to be ok to not *self and *opponent. 
+        // when i remove the * in lines 31,32,33, it wouldn't compile with message: 
+        // "no implementation for `&RPC == RPC`"
+        if self == oppenent {
             // draw
             3
         } else if (*self == RPC::Rock && *oppenent == RPC::Scissor)
