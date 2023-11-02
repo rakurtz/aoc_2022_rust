@@ -12,6 +12,13 @@ enum RPC {
     Scissor,
 }
 
+#[derive(PartialEq)]
+enum GameResult {
+    Win,
+    Lose,
+    Draw,
+}
+
 impl RPC {
     fn rpc_score(&self) -> u32 {
         // the score of players choice
@@ -40,6 +47,33 @@ impl RPC {
             0
         }
     }
+
+    fn match_action_to_achieve(game_result: GameResult, opponent: &RPC) -> RPC {
+        if game_result == GameResult::Draw {
+            // i would like to just return *opponent, but it doenst implement the copy trait. 
+            // how to achieve that?
+            match *opponent {
+                RPC::Rock => RPC::Rock,
+                RPC::Paper => RPC::Paper,
+                RPC::Scissor => RPC::Scissor,
+            }
+        } else if game_result == GameResult::Win {
+            match *opponent {
+                RPC::Rock => RPC::Paper,
+                RPC::Paper => RPC::Scissor,
+                RPC::Scissor => RPC::Rock,
+            }
+        } else {
+            // lose
+            match *opponent {
+                RPC::Rock => RPC::Scissor,
+                RPC::Paper => RPC::Rock,
+                RPC::Scissor => RPC::Paper,
+            }
+        }
+    }
+
+
 }
 
 fn pt1_calculate_score(input: String) -> u32 {
@@ -54,7 +88,7 @@ fn pt1_calculate_score(input: String) -> u32 {
             "B" => RPC::Paper,
             "C" => RPC::Scissor,
             _ => {
-                panic!("could parse input")
+                panic!("could not parse input")
             }
         };
         let player = match v[1] {
@@ -62,7 +96,7 @@ fn pt1_calculate_score(input: String) -> u32 {
             "Y" => RPC::Paper,
             "Z" => RPC::Scissor,
             _ => {
-                panic!("could parse input")
+                panic!("could not parse input")
             }
         };
 
@@ -72,18 +106,52 @@ fn pt1_calculate_score(input: String) -> u32 {
     score
 }
 
+
+fn pt2_calculate_score(input: String) -> u32 {
+    let mut score = 0;
+
+    for line in input.lines() {
+        let v: Vec<&str> = line.split(' ').collect();
+
+        // style: should the matching be refactored to a seperate function?
+        let opponent = match v[0] {
+            "A" => RPC::Rock,
+            "B" => RPC::Paper,
+            "C" => RPC::Scissor,
+            _ => {
+                panic!("could not parse input")
+            }
+        };
+
+        let game_result = match v[1] {
+            "X" => GameResult::Lose,
+            "Y" => GameResult::Draw,
+            "Z" => GameResult::Win,
+            _ => {
+                panic!("could not parse input")
+            }
+        };
+
+        let player = RPC::match_action_to_achieve(game_result, &opponent);
+        score += player.rpc_score();
+        score += player.game_score(&opponent);
+    }
+    score
+
+}
+
 fn main() {
     // read file to string
     let input = fs::read_to_string("puzzle_inputs/input.txt").expect("Could not read input file");
 
-    println!("Day 2, part 1 - {}", pt1_calculate_score(input));
-    // println!("Day 2, part 2 - {}", value);
+    println!("Day 2, part 1 - {}", pt1_calculate_score(input.clone()));
+    println!("Day 2, part 2 - {}", pt2_calculate_score(input.clone()));
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    
     #[test]
     fn sample_input_for_pt1() {
         let input = "A Y
@@ -92,4 +160,14 @@ C Z"
         .to_string();
         assert_eq!(15, pt1_calculate_score(input));
     }
+
+    #[test]
+    fn sample_input_for_pt2() {
+        let input = "A Y
+B X
+C Z"
+        .to_string();
+        assert_eq!(12, pt2_calculate_score(input));
+    }
+
 }
