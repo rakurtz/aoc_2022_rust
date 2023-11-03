@@ -3,8 +3,6 @@
 
 use std::fs;
 
-// question here: Why do in need to derive PartialEQ
-// when i want to compare the very types/values itself in fn game_score?
 #[derive(PartialEq, Clone, Copy)]
 enum GameAction {
     Rock,
@@ -20,7 +18,7 @@ enum GameResult {
 }
 
 impl GameResult {
-    fn match_result_by_str(s: &str) -> GameResult{
+    fn match_result_by_str(s: &str) -> GameResult {
         match s {
             "X" => GameResult::Lose,
             "Y" => GameResult::Draw,
@@ -33,8 +31,7 @@ impl GameResult {
 
     fn match_action_to_achieve(&self, opponent: &GameAction) -> GameAction {
         if *self == GameResult::Draw {
-           *opponent
-
+            *opponent
         } else if *self == GameResult::Win {
             match *opponent {
                 GameAction::Rock => GameAction::Paper,
@@ -75,9 +72,6 @@ impl GameAction {
 
     fn game_score(&self, oppenent: &GameAction) -> u32 {
         // the game's score
-        // question: in line 27 it seems to be ok to not *self and *opponent. 
-        // when i remove the * in lines 31,32,33, it wouldn't compile with message: 
-        // "no implementation for `&RPC == RPC`"
         if self == oppenent {
             // draw
             3
@@ -109,7 +103,6 @@ fn pt1_calculate_score(input: String) -> u32 {
     score
 }
 
-
 fn pt2_calculate_score(input: String) -> u32 {
     let mut score = 0;
 
@@ -124,7 +117,6 @@ fn pt2_calculate_score(input: String) -> u32 {
         score += player.game_score(&opponent);
     }
     score
-
 }
 
 fn main() {
@@ -138,7 +130,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn sample_input_for_pt1() {
         let input = "A Y
@@ -156,5 +148,4 @@ C Z"
         .to_string();
         assert_eq!(12, pt2_calculate_score(input));
     }
-
 }
