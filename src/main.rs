@@ -5,8 +5,8 @@ use std::fs;
 
 // question here: Why do in need to derive PartialEQ
 // when i want to compare the very types/values itself in fn game_score?
-#[derive(PartialEq)]
-enum RPC {
+#[derive(PartialEq, Clone, Copy)]
+enum GameAction {
     Rock,
     Paper,
     Scissor,
@@ -19,16 +19,61 @@ enum GameResult {
     Draw,
 }
 
-impl RPC {
-    fn rpc_score(&self) -> u32 {
-        // the score of players choice
-        match *self {
-            RPC::Rock => 1,
-            RPC::Paper => 2,
-            RPC::Scissor => 3,
+impl GameResult {
+    fn match_result_by_str(s: &str) -> GameResult{
+        match s {
+            "X" => GameResult::Lose,
+            "Y" => GameResult::Draw,
+            "Z" => GameResult::Win,
+            _ => {
+                panic!("could not parse input")
+            }
         }
     }
-    fn game_score(&self, oppenent: &RPC) -> u32 {
+
+    fn match_action_to_achieve(&self, opponent: &GameAction) -> GameAction {
+        if *self == GameResult::Draw {
+           *opponent
+
+        } else if *self == GameResult::Win {
+            match *opponent {
+                GameAction::Rock => GameAction::Paper,
+                GameAction::Paper => GameAction::Scissor,
+                GameAction::Scissor => GameAction::Rock,
+            }
+        } else {
+            // lose
+            match *opponent {
+                GameAction::Rock => GameAction::Scissor,
+                GameAction::Paper => GameAction::Rock,
+                GameAction::Scissor => GameAction::Paper,
+            }
+        }
+    }
+}
+
+impl GameAction {
+    fn action_score(&self) -> u32 {
+        // the score of players choice
+        match *self {
+            GameAction::Rock => 1,
+            GameAction::Paper => 2,
+            GameAction::Scissor => 3,
+        }
+    }
+
+    fn match_action_by_str(s: &str) -> GameAction {
+        match s {
+            "A" | "X" => GameAction::Rock,
+            "B" | "Y" => GameAction::Paper,
+            "C" | "Z" => GameAction::Scissor,
+            _ => {
+                panic!("could not parse input")
+            }
+        }
+    }
+
+    fn game_score(&self, oppenent: &GameAction) -> u32 {
         // the game's score
         // question: in line 27 it seems to be ok to not *self and *opponent. 
         // when i remove the * in lines 31,32,33, it wouldn't compile with message: 
@@ -36,9 +81,9 @@ impl RPC {
         if self == oppenent {
             // draw
             3
-        } else if (*self == RPC::Rock && *oppenent == RPC::Scissor)
-            || (*self == RPC::Paper && *oppenent == RPC::Rock)
-            || (*self == RPC::Scissor && *oppenent == RPC::Paper)
+        } else if (*self == GameAction::Rock && *oppenent == GameAction::Scissor)
+            || (*self == GameAction::Paper && *oppenent == GameAction::Rock)
+            || (*self == GameAction::Scissor && *oppenent == GameAction::Paper)
         {
             // winning
             6
@@ -47,33 +92,6 @@ impl RPC {
             0
         }
     }
-
-    fn match_action_to_achieve(game_result: GameResult, opponent: &RPC) -> RPC {
-        if game_result == GameResult::Draw {
-            // i would like to just return *opponent, but it doenst implement the copy trait. 
-            // how to achieve that?
-            match *opponent {
-                RPC::Rock => RPC::Rock,
-                RPC::Paper => RPC::Paper,
-                RPC::Scissor => RPC::Scissor,
-            }
-        } else if game_result == GameResult::Win {
-            match *opponent {
-                RPC::Rock => RPC::Paper,
-                RPC::Paper => RPC::Scissor,
-                RPC::Scissor => RPC::Rock,
-            }
-        } else {
-            // lose
-            match *opponent {
-                RPC::Rock => RPC::Scissor,
-                RPC::Paper => RPC::Rock,
-                RPC::Scissor => RPC::Paper,
-            }
-        }
-    }
-
-
 }
 
 fn pt1_calculate_score(input: String) -> u32 {
@@ -82,25 +100,10 @@ fn pt1_calculate_score(input: String) -> u32 {
     for line in input.lines() {
         let v: Vec<&str> = line.split(' ').collect();
 
-        // style: should the matching be refactored to a seperate function?
-        let opponent = match v[0] {
-            "A" => RPC::Rock,
-            "B" => RPC::Paper,
-            "C" => RPC::Scissor,
-            _ => {
-                panic!("could not parse input")
-            }
-        };
-        let player = match v[1] {
-            "X" => RPC::Rock,
-            "Y" => RPC::Paper,
-            "Z" => RPC::Scissor,
-            _ => {
-                panic!("could not parse input")
-            }
-        };
+        let opponent = GameAction::match_action_by_str(v.get(0).unwrap());
+        let player = GameAction::match_action_by_str(v.get(1).unwrap());
 
-        score += player.rpc_score();
+        score += player.action_score();
         score += player.game_score(&opponent);
     }
     score
@@ -113,27 +116,11 @@ fn pt2_calculate_score(input: String) -> u32 {
     for line in input.lines() {
         let v: Vec<&str> = line.split(' ').collect();
 
-        // style: should the matching be refactored to a seperate function?
-        let opponent = match v[0] {
-            "A" => RPC::Rock,
-            "B" => RPC::Paper,
-            "C" => RPC::Scissor,
-            _ => {
-                panic!("could not parse input")
-            }
-        };
+        let opponent = GameAction::match_action_by_str(v.get(0).unwrap());
+        let game_result = GameResult::match_result_by_str(v.get(1).unwrap());
+        let player = game_result.match_action_to_achieve(&opponent);
 
-        let game_result = match v[1] {
-            "X" => GameResult::Lose,
-            "Y" => GameResult::Draw,
-            "Z" => GameResult::Win,
-            _ => {
-                panic!("could not parse input")
-            }
-        };
-
-        let player = RPC::match_action_to_achieve(game_result, &opponent);
-        score += player.rpc_score();
+        score += player.action_score();
         score += player.game_score(&opponent);
     }
     score
