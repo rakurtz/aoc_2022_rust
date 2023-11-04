@@ -1,130 +1,62 @@
 // Advent of Code 2022 in Rust
-// Day 2
+// Day 3
 
 use std::fs;
 
-#[derive(PartialEq, Clone, Copy)]
-enum GameAction {
-    Rock,
-    Paper,
-    Scissor,
-}
+static ASCII_LOWER: [char; 26] = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+    't', 'u', 'v', 'w', 'x', 'y', 'z',
+];
 
-#[derive(PartialEq)]
-enum GameResult {
-    Win,
-    Lose,
-    Draw,
-}
-
-impl GameResult {
-    fn match_result_by_str(s: &str) -> GameResult {
-        match s {
-            "X" => GameResult::Lose,
-            "Y" => GameResult::Draw,
-            "Z" => GameResult::Win,
-            _ => {
-                panic!("could not parse input")
-            }
+fn duplicate_item(line: &str) -> Result<char, String> {
+    let compartment_a = &line[0..line.len() / 2];
+    let compartnemt_b = &line[line.len() / 2..];
+    for c in compartment_a.chars() {
+        if compartnemt_b.contains(c) {
+            return Ok(c);
         }
     }
+    Err("no duplicate result found".to_string())
+}
 
-    fn match_action_to_achieve(&self, opponent: &GameAction) -> GameAction {
-        if *self == GameResult::Draw {
-            *opponent
-        } else if *self == GameResult::Win {
-            match *opponent {
-                GameAction::Rock => GameAction::Paper,
-                GameAction::Paper => GameAction::Scissor,
-                GameAction::Scissor => GameAction::Rock,
-            }
-        } else {
-            // lose
-            match *opponent {
-                GameAction::Rock => GameAction::Scissor,
-                GameAction::Paper => GameAction::Rock,
-                GameAction::Scissor => GameAction::Paper,
-            }
-        }
+fn priority_of_char(c: char) -> usize {
+    // returns the priority of a given char c by finding its position in the alphabet (static ASCII_LOWER)
+    // since the priority for upper case charecters ist the same as for lower case character plus 26 
+    // the .position() is only run on to_lowercase()ed characters
+
+    if c.is_lowercase() {
+        let index = ASCII_LOWER.iter().position(|&r| r == c).unwrap();
+        return index + 1;
+    } else {
+        let index = ASCII_LOWER
+            .iter()
+            .position(|&r| r == c.to_lowercase().next().unwrap())
+            .unwrap();
+        return index + 1 + 26;
     }
 }
 
-impl GameAction {
-    fn action_score(&self) -> u32 {
-        // the score of players choice
-        match *self {
-            GameAction::Rock => 1,
-            GameAction::Paper => 2,
-            GameAction::Scissor => 3,
-        }
-    }
-
-    fn match_action_by_str(s: &str) -> GameAction {
-        match s {
-            "A" | "X" => GameAction::Rock,
-            "B" | "Y" => GameAction::Paper,
-            "C" | "Z" => GameAction::Scissor,
-            _ => {
-                panic!("could not parse input")
-            }
-        }
-    }
-
-    fn game_score(&self, oppenent: &GameAction) -> u32 {
-        // the game's score
-        if self == oppenent {
-            // draw
-            3
-        } else if (*self == GameAction::Rock && *oppenent == GameAction::Scissor)
-            || (*self == GameAction::Paper && *oppenent == GameAction::Rock)
-            || (*self == GameAction::Scissor && *oppenent == GameAction::Paper)
-        {
-            // winning
-            6
-        } else {
-            // losing...
-            0
-        }
-    }
-}
-
-fn pt1_calculate_score(input: String) -> u32 {
-    let mut score = 0;
+fn pt1_calculate(input: String) -> usize {
+    let mut priority_sum = 0;
 
     for line in input.lines() {
-        let v: Vec<&str> = line.split(' ').collect();
-
-        let opponent = GameAction::match_action_by_str(v.get(0).unwrap());
-        let player = GameAction::match_action_by_str(v.get(1).unwrap());
-
-        score += player.action_score();
-        score += player.game_score(&opponent);
+        let c = duplicate_item(line).unwrap();
+        priority_sum += priority_of_char(c)
     }
-    score
+
+    priority_sum
 }
 
-fn pt2_calculate_score(input: String) -> u32 {
-    let mut score = 0;
-
-    for line in input.lines() {
-        let v: Vec<&str> = line.split(' ').collect();
-
-        let opponent = GameAction::match_action_by_str(v.get(0).unwrap());
-        let game_result = GameResult::match_result_by_str(v.get(1).unwrap());
-        let player = game_result.match_action_to_achieve(&opponent);
-
-        score += player.action_score();
-        score += player.game_score(&opponent);
-    }
-    score
-}
+// fn pt2_calculate() {
+//     todo!();
+// }
 
 fn main() {
     // read file to string
     let input = fs::read_to_string("puzzle_inputs/input.txt").expect("Could not read input file");
 
-    println!("Day 2, part 1 - {}", pt1_calculate_score(input.clone()));
-    println!("Day 2, part 2 - {}", pt2_calculate_score(input.clone()));
+    println!("Day 3, part 1 - {}", pt1_calculate(input.clone()));
+    // println!("Day 3, part 2 - {}", pt2_calculate(input.clone()));
 }
 
 #[cfg(test)]
@@ -133,19 +65,14 @@ mod tests {
 
     #[test]
     fn sample_input_for_pt1() {
-        let input = "A Y
-B X
-C Z"
-        .to_string();
-        assert_eq!(15, pt1_calculate_score(input));
-    }
+        let input = "vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw"
+            .to_string();
 
-    #[test]
-    fn sample_input_for_pt2() {
-        let input = "A Y
-B X
-C Z"
-        .to_string();
-        assert_eq!(12, pt2_calculate_score(input));
+        assert_eq!(157, pt1_calculate(input));
     }
 }
