@@ -3,20 +3,51 @@
 
 use std::fs;
 
+struct Range {
+    start: usize,
+    end: usize,
+    range: Vec<usize>,
+}
+
+impl Range {
+    fn get_ranges_by_line(line: &str) -> (Range, Range) {
+        let mut str_ranges: Vec<&str> = line.split(',').collect();
+        let mut str_range_2: Vec<&str> = str_ranges.pop().unwrap().split('-').collect();
+        let mut str_range_1: Vec<&str> = str_ranges.pop().unwrap().split('-').collect();
+        
+        let end = str_range_1.pop().unwrap().parse::<usize>().unwrap();
+        let start = str_range_1.pop().unwrap().parse::<usize>().unwrap();
+        let range = (start..=end).collect();
+
+        let range1 = Range {
+            start: start,
+            end: end,
+            range: range,
+        };
+
+        let end = str_range_2.pop().unwrap().parse::<usize>().unwrap();
+        let start = str_range_2.pop().unwrap().parse::<usize>().unwrap();
+        let range = (start..=end).collect();
+
+        let range2 = Range {
+            start: start,
+            end: end,
+            range: range,
+        };
+
+        (range1, range2)
+    }
+}
+
 fn pt1_calculate(input: String) -> usize {
     // range is fully contained by the other
     let mut count_fully_containing = 0;
 
     for line in input.lines() {
-        let line_parts: Vec<&str> = line.split(',').collect();
-        let first_a_b: Vec<&str> = line_parts[0].split('-').collect();
-        let second_a_b: Vec<&str> = line_parts[1].split('-').collect();
-        if second_a_b[0].parse::<usize>().unwrap() >= first_a_b[0].parse().unwrap()
-            && second_a_b[1].parse::<usize>().unwrap() <= first_a_b[1].parse().unwrap()
-        {
-            count_fully_containing += 1;
-        } else if second_a_b[0].parse::<usize>().unwrap() <= first_a_b[0].parse().unwrap()
-            && second_a_b[1].parse::<usize>().unwrap() >= first_a_b[1].parse().unwrap()
+        let (range1, range2) = Range::get_ranges_by_line(line);
+
+        if (range1.range.contains(&range2.start) && range1.range.contains(&range2.end))
+            || (range2.range.contains(&range1.start) && range2.range.contains(&range1.end))
         {
             count_fully_containing += 1;
         }
@@ -29,21 +60,12 @@ fn pt2_calculate(input: String) -> usize {
     let mut count_overlapping = 0;
 
     for line in input.lines() {
-        let line_parts: Vec<&str> = line.split(',').collect();
-        let first_a_b: Vec<&str> = line_parts[0].split('-').collect();
-        let second_a_b: Vec<&str> = line_parts[1].split('-').collect();
-        if (first_a_b[0].parse::<usize>().unwrap()..=first_a_b[1].parse::<usize>().unwrap())
-            .collect::<Vec<usize>>()
-            .contains(&second_a_b[0].parse::<usize>().unwrap())
-            || (first_a_b[0].parse::<usize>().unwrap()..=first_a_b[1].parse::<usize>().unwrap())
-                .collect::<Vec<usize>>()
-                .contains(&second_a_b[1].parse::<usize>().unwrap())
-            || (second_a_b[0].parse::<usize>().unwrap()..=second_a_b[1].parse::<usize>().unwrap())
-                .collect::<Vec<usize>>()
-                .contains(&first_a_b[0].parse::<usize>().unwrap())
-            || (second_a_b[0].parse::<usize>().unwrap()..=second_a_b[1].parse::<usize>().unwrap())
-                .collect::<Vec<usize>>()
-                .contains(&first_a_b[1].parse::<usize>().unwrap())
+        let (range1, range2) = Range::get_ranges_by_line(line);
+
+        if range1.range.contains(&range2.start)
+            || range1.range.contains(&range2.end)
+            || range2.range.contains(&range1.start)
+            || range2.range.contains(&range1.end)
         {
             count_overlapping += 1;
         }
