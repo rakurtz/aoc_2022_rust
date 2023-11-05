@@ -14,7 +14,7 @@ fn main() {
             Ok(3) => aoc_2022::solutions::day3::run(),
             Ok(4) => aoc_2022::solutions::day4::run(),
             Ok(5) => aoc_2022::solutions::day5::run(),
-            Ok(6) => aoc_2022::solutions::day6::run(),
+            Ok(6) => aoc_2022::solutions::day6::run(), // result not correct yest
             Ok(7) => aoc_2022::solutions::day7::run(),
 
             _ => println!("{}", USAGE),
