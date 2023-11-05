@@ -99,7 +99,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sample_input_for_pt1() {
+    fn day_5_sample_input_for_pt1() {
         let input = "    [D]    
 [N] [C]    
 [Z] [M] [P]

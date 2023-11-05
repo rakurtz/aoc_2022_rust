@@ -82,7 +82,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sample_input_for_pt1() {
+    fn day_4_sample_input_for_pt1() {
         let input = "2-4,6-8
 2-3,4-5
 5-7,7-9
@@ -94,7 +94,7 @@ mod tests {
         assert_eq!(2, pt1_calculate(input));
     }
     #[test]
-    fn sample_input_for_pt2() {
+    fn day_4_sample_input_for_pt2() {
         let input = "2-4,6-8
 2-3,4-5
 5-7,7-9

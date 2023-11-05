@@ -129,7 +129,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sample_input_for_pt1() {
+    fn day_2_sample_input_for_pt1() {
         let input = "A Y
 B X
 C Z"
@@ -138,7 +138,7 @@ C Z"
     }
 
     #[test]
-    fn sample_input_for_pt2() {
+    fn day_2_sample_input_for_pt2() {
         let input = "A Y
 B X
 C Z"

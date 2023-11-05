@@ -87,7 +87,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sample_input_for_pt1() {
+    fn day_3_sample_input_for_pt1() {
         let input = "vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
@@ -99,7 +99,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw"
         assert_eq!(157, pt1_calculate(input));
     }
     #[test]
-    fn sample_input_for_pt2() {
+    fn day_3_sample_input_for_pt2() {
         let input = "vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg

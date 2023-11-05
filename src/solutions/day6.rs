@@ -57,7 +57,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sample_input_for_pt1() {
+    fn day_6_sample_input_for_pt1() {
         let example_1 = "bvwbjplbgvbhsrlpgdmjqwftvncz".to_string(); // after 5 chars
         let example_2 = "nppdvjthqldpwncqszvftbrmjlhg".to_string(); // after 6 chars
         let example_3 = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string(); // after 10 chars
