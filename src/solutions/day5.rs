@@ -1,8 +1,8 @@
-use crate::common;
+use super::super::read_file;
 use std::collections::VecDeque;
 
 pub fn run() {
-    let input = common::read_file(5).expect("Couldn't read file");
+    let input = read_file(5).expect("Couldn't read file");
 
     // calling with 9 piles because that is known
     println!("Day 5, part 1 - {}", pt1_calculate(input.clone(), 9));

@@ -1,4 +1,4 @@
-use crate::common;
+use super::super::read_file;
 
 pub fn run() {
     let mut elves = Elves::new();
@@ -6,7 +6,7 @@ pub fn run() {
     // let collection = fs::read_to_string("puzzle_inputs/day01_1.txt")
     //     .expect("Could not read file");
 
-    let collection = common::read_file(1).expect("Couldn't read file");
+    let collection = read_file(1).expect("Couldn't read file");
 
     elves.populate_elves_from_string(collection);
 

@@ -1,8 +1,8 @@
-use crate::common;
+use super::super::read_file;
 
 pub fn run() {
     // read file to string
-    let input = common::read_file(4).expect("Couldn't read file");
+    let input = read_file(4).expect("Couldn't read file");
     println!("Day 4, part 1 - {}", pt1_calculate(input.clone()));
     println!("Day 4, part 2 - {}", pt2_calculate(input.clone()));
 }
