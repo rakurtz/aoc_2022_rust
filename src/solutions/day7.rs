@@ -1,7 +1,6 @@
 use super::super::read_file;
 use std::collections::HashMap;
 
-
 pub fn run() {
     // read file to string
     let input = read_file(7).expect("Couldn't read file");
@@ -10,163 +9,139 @@ pub fn run() {
 }
 
 fn pt1_calculate(input: String) -> usize {
-    let mut root_dir = Directory {
+    // generating our starting structs
+    let root_dir = Directory {
         id: 0,
-        is_read: false,
-        name: "root".to_string(),
         parent_id: None,
-        directories: Vec::new(),
-        files: Vec::new(),
-        flat_size: 0,
-        deep_size: 0,
-    }
-
-    let mut state = State {
-        dir_map: HashMap::new(),
-        file_map: HashMap::new(),
-        current_dir_id: 0,
-        current_level: 0,
+        //directories: Vec::new(),
+        size: 0,
     };
 
+    let mut state = FileSystem {
+        dir_map: HashMap::new(),
+        current_dir_id: root_dir.id,
+        counter: 0,
+    };
 
+    state.dir_map.insert(0, root_dir);
+
+    // parsing each line
     for line in input.lines() {
-        let expr =  line.split(' ').collect().get(0).unwrap();
-        match expr {
-            "$" => parse_command(line),
-            "dir" => state.register_directory(line),
-            _   => state.current_dir.add_file(),
+        state.counter += 1;
+        let splitted: Vec<&str> = line.split(' ').collect();
+
+        if let Some(expr) = splitted.get(0) {
+            match *expr {
+                "$" => {
+                    state.parse_command(line);
+                }
+                "dir" => (),
+                _ => {
+                    let size = expr.parse::<usize>().unwrap();
+                    state.get_current_dir().size += size;
+                }
+            }
         }
-        
     }
-    todo!();
+
+    state.sum_of_size_at_most_100000()
 }
 
-struct State {
+struct FileSystem {
     dir_map: HashMap<usize, Directory>,
-    file_map: HashMap<usize, File>,
     current_dir_id: usize,
-    current_level: usize,
+    counter: usize,
 }
 
-impl State {
+impl FileSystem {
+    fn register_and_enter_new_dir(&mut self) {
+        let dir = Directory {
+            id: self.counter,
+            parent_id: Some(self.current_dir_id),
+            //directories: Vec::new(),
+            size: 0,
+        };
 
-    fn level_into(&mut self) {
-        self.level += 1;
+        self.dir_map.insert(self.counter, dir);
+        self.current_dir_id = self.counter;
     }
 
-    fn level_out(&mut self) {
-        if self.level >= 1 {
-            self.level -= 1;
-        } else {
-            println!("Warning, already in root-level");
-        }
-    }
-
-    fn register_directory(&mut self, dir: &mut Directory) -> usize { // return id
-        todo!();
-        // generate hash via self.generate_id(dir.name)
-        // write hash into dir.id
-        // add to self.dir_map
-        // return id
-    }
-
-    fn generate_id(&self, name: &str) -> usize {
-        todo!();
-        // what kind of id (hash / random nummer??) shall we use here
-        // accordingly change types in State, Directory, and File
-    }
-
-    fn current_dir(&self) -> &Directory {
-        let (_, dir) = self.dir_map.get_key_value(&self.current_dir_id).unwrap();
+    fn get_parent_dir(&mut self) -> &mut Directory {
+        let parent_id = self.get_current_dir().parent_id.unwrap();
+        let dir = self.dir_map.get_mut(&parent_id).unwrap();
         dir
     }
 
-}
+    fn get_current_dir(&mut self) -> &mut Directory {
+        let dir = self.dir_map.get_mut(&self.current_dir_id).unwrap();
+        dir
+    }
 
+    fn parse_command(&mut self, line: &str) {
+        if line.contains("cd /") {
+            self.current_dir_id = 0;
+        } else if line.contains("cd ..") {
+            //add current size to parent size
+            self.get_parent_dir().size += self.get_current_dir().size;
+            self.current_dir_id = self.get_current_dir().parent_id.unwrap();
+        } else if line.contains("cd") {
+            self.register_and_enter_new_dir();
+        }
+    }
+
+    fn sum_of_size_at_most_100000(&self) -> usize {
+        let mut under_100000: Vec<usize> = Vec::new();
+        for (_, dir) in &self.dir_map {
+            if dir.size <= 100000 {
+                under_100000.push(dir.size);
+            }
+        }
+        let sum = under_100000.iter().sum();
+        sum
+    }
+
+
+}
 
 struct Directory {
     // todo: impl. defaults
-    id: usize,  // root has id 0
-    is_read: bool,
-    name: String,
+    id: usize,                // root has id 0
     parent_id: Option<usize>, // root diretory has none
-    directories: Vec<usize>,
-    files: Vec<usize>,
-    flat_size: usize,
-    deep_size: usize,
-} 
-
-impl Directory {
-    fn register_new_dir(line: &str, parent_id: usize, state: &mut State) -> usize {  // returning the id of directory
-        todo!();
-        // generate_id and add empty dir into hash_map
-        // return id
-    }
-    
-    fn read_dir(&mut self, line: &str, state: &mut State) {
-        todo!();
-        // level.down()
-        // call register_new_dir for each dir
-        // create and add Files to self.files and add to flat_size
-    }
-    
-    fn return_to_parent_dir(&self, parent: usize, state: &mut State) -> Directory {
-        todo!();
-        
-        // add own flat_size to parent
-        // set is_read to true
-        // return hash_map.key(parent)
-        
-    }
-    
-    
+    //directories: Vec<usize>,
+    size: usize,
 }
-
-
-
-struct File {
-    id: usize,
-    name: String,
-    size: usize
-}
-
-struct Level {
-    level: usize,
-}
-
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn day_7_sample_input_for_pt1() {
         let input = "$ cd /
-    $ ls
-    dir a
-    14848514 b.txt
-    8504156 c.dat
-    dir d
-    $ cd a
-    $ ls
-    dir e
-    29116 f
-    2557 g
-    62596 h.lst
-    $ cd e
-    $ ls
-    584 i
-    $ cd ..
-    $ cd ..
-    $ cd d
-    $ ls
-    4060174 j
-    8033020 d.log
-    5626152 d.ext
-    7214296 k".to_string();
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k"
+            .to_string();
 
         assert_eq!(95437, pt1_calculate(input));
     }
-
 }
