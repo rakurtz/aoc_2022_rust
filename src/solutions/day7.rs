@@ -8,43 +8,12 @@ pub fn run() {
     // println!("Day 7, part 2 - {}", pt2_calculate(input.clone()));
 }
 
-fn pt1_calculate(input: String) -> usize {
-    // generating our starting structs
-    let root_dir = Directory {
-        id: 0,
-        parent_id: None,
-        //directories: Vec::new(),
-        size: 0,
-    };
-
-    let mut state = FileSystem {
-        dir_map: HashMap::new(),
-        current_dir_id: root_dir.id,
-        counter: 0,
-    };
-
-    state.dir_map.insert(0, root_dir);
-
-    // parsing each line
-    for line in input.lines() {
-        state.counter += 1;
-        let splitted: Vec<&str> = line.split(' ').collect();
-
-        if let Some(expr) = splitted.get(0) {
-            match *expr {
-                "$" => {
-                    state.parse_command(line);
-                }
-                "dir" => (),
-                _ => {
-                    let size = expr.parse::<usize>().unwrap();
-                    state.get_current_dir().size += size;
-                }
-            }
-        }
-    }
-
-    state.sum_of_size_at_most_100000()
+struct Directory {
+    // todo: impl. defaults
+    id: usize,                // root has id 0
+    parent_id: Option<usize>, // root diretory has none
+    //directories: Vec<usize>,
+    size: usize,
 }
 
 struct FileSystem {
@@ -99,16 +68,45 @@ impl FileSystem {
         let sum = under_100000.iter().sum();
         sum
     }
-
-
 }
 
-struct Directory {
-    // todo: impl. defaults
-    id: usize,                // root has id 0
-    parent_id: Option<usize>, // root diretory has none
-    //directories: Vec<usize>,
-    size: usize,
+fn pt1_calculate(input: String) -> usize {
+    // generating our starting structs
+    let root_dir = Directory {
+        id: 0,
+        parent_id: None,
+        //directories: Vec::new(),
+        size: 0,
+    };
+
+    let mut state = FileSystem {
+        dir_map: HashMap::new(),
+        current_dir_id: root_dir.id,
+        counter: 0,
+    };
+
+    state.dir_map.insert(0, root_dir);
+
+    // parsing each line
+    for line in input.lines() {
+        state.counter += 1;
+        let splitted: Vec<&str> = line.split(' ').collect();
+
+        if let Some(expr) = splitted.get(0) {
+            match *expr {
+                "$" => {
+                    state.parse_command(line);
+                }
+                "dir" => (),
+                _ => {
+                    let size = expr.parse::<usize>().unwrap();
+                    state.get_current_dir().size += size;
+                }
+            }
+        }
+    }
+
+    state.sum_of_size_at_most_100000()
 }
 
 #[cfg(test)]
