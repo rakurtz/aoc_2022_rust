@@ -71,4 +71,19 @@ mod tests {
         assert_eq!(Some(10), return_first_distinct_with_buffer_size(example_3, 4));
         assert_eq!(Some(11), return_first_distinct_with_buffer_size(example_4, 4));
     }
+
+    #[test]
+    fn day_6_sample_input_for_pt2() {
+        let example_1 = "mjqjpqmgbljsphdztnvjfqwrcgsmlb".to_string(); // after 19 chars
+        let example_2 = "bvwbjplbgvbhsrlpgdmjqwftvncz".to_string(); // after 23 chars
+        let example_3 = "nppdvjthqldpwncqszvftbrmjlhg".to_string(); // after 23 chars
+        let example_4 = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string(); // after 29 chars
+        let example_5 = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string(); // after 26 chars
+
+        assert_eq!(Some(19), return_first_distinct_with_buffer_size(example_1, 14));
+        assert_eq!(Some(23), return_first_distinct_with_buffer_size(example_2, 14));
+        assert_eq!(Some(23), return_first_distinct_with_buffer_size(example_3, 14));
+        assert_eq!(Some(29), return_first_distinct_with_buffer_size(example_4, 14));
+        assert_eq!(Some(26), return_first_distinct_with_buffer_size(example_5, 14));
+    }
 }
