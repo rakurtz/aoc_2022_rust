@@ -7,7 +7,7 @@ pub fn run() {
     let input = read_file(6).expect("Couldn't read file");
     println!(
         "Day 6, part 1 - {}",
-        pt1_calculate(input.clone(), 8).unwrap()
+        pt1_calculate(input.clone(), 4).unwrap()
     );
     //println!("Day 6, part 2 - {}", pt2_calculate(input.clone()));
 }
