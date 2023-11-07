@@ -66,10 +66,22 @@ mod tests {
         let example_3 = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string(); // after 10 chars
         let example_4 = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string(); // after 11 chars
 
-        assert_eq!(Some(5), return_first_distinct_with_buffer_size(example_1, 4));
-        assert_eq!(Some(6), return_first_distinct_with_buffer_size(example_2, 4));
-        assert_eq!(Some(10), return_first_distinct_with_buffer_size(example_3, 4));
-        assert_eq!(Some(11), return_first_distinct_with_buffer_size(example_4, 4));
+        assert_eq!(
+            Some(5),
+            return_first_distinct_with_buffer_size(example_1, 4)
+        );
+        assert_eq!(
+            Some(6),
+            return_first_distinct_with_buffer_size(example_2, 4)
+        );
+        assert_eq!(
+            Some(10),
+            return_first_distinct_with_buffer_size(example_3, 4)
+        );
+        assert_eq!(
+            Some(11),
+            return_first_distinct_with_buffer_size(example_4, 4)
+        );
     }
 
     #[test]
@@ -80,10 +92,25 @@ mod tests {
         let example_4 = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string(); // after 29 chars
         let example_5 = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string(); // after 26 chars
 
-        assert_eq!(Some(19), return_first_distinct_with_buffer_size(example_1, 14));
-        assert_eq!(Some(23), return_first_distinct_with_buffer_size(example_2, 14));
-        assert_eq!(Some(23), return_first_distinct_with_buffer_size(example_3, 14));
-        assert_eq!(Some(29), return_first_distinct_with_buffer_size(example_4, 14));
-        assert_eq!(Some(26), return_first_distinct_with_buffer_size(example_5, 14));
+        assert_eq!(
+            Some(19),
+            return_first_distinct_with_buffer_size(example_1, 14)
+        );
+        assert_eq!(
+            Some(23),
+            return_first_distinct_with_buffer_size(example_2, 14)
+        );
+        assert_eq!(
+            Some(23),
+            return_first_distinct_with_buffer_size(example_3, 14)
+        );
+        assert_eq!(
+            Some(29),
+            return_first_distinct_with_buffer_size(example_4, 14)
+        );
+        assert_eq!(
+            Some(26),
+            return_first_distinct_with_buffer_size(example_5, 14)
+        );
     }
 }

@@ -6,7 +6,7 @@ pub fn run() {
 
     // calling with 9 piles because that is known
     println!("Day 5, part 1 - {}", calculate(input.clone(), 9, 1));
-    println!("Day 5, part 2 - {}", calculate(input.clone(), 9, 2));;
+    println!("Day 5, part 2 - {}", calculate(input.clone(), 9, 2));
 }
 
 #[derive(Debug)]
@@ -83,7 +83,7 @@ impl Storage {
             }
             for _ in 0..amount {
                 self.storage[to_pile].push_back(temp_vec.pop().unwrap());
-            } 
+            }
         }
     }
 
@@ -100,7 +100,7 @@ impl Storage {
 fn calculate(input: String, amount_of_piles: usize, part: u8) -> String {
     // amount of piles differs for tests (3) and for the puzzle input (9)
     // last functions argument (part 1 or 2) defines which puzzle solution to be run
-    
+
     let mut storage = Storage::new_with_amount_of_piles(amount_of_piles);
 
     // split input into storage_pattern and command_pattern
@@ -122,7 +122,6 @@ fn calculate(input: String, amount_of_piles: usize, part: u8) -> String {
         2 => storage.move_crates_by_command_pattern_multi_crates(command_pattern),
         _ => panic!("fn calculate was called without part specified"),
     }
-    
 
     // retrieve and return top crate
     storage.top_crates_as_string()
@@ -148,7 +147,6 @@ move 1 from 1 to 2"
         // calling with 3 piles for test input because it is known...
         assert_eq!("CMZ", calculate(input, 3, 1));
     }
-
 
     #[test]
     fn day_5_sample_input_for_pt2() {
