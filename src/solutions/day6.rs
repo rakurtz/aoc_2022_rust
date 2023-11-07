@@ -7,9 +7,12 @@ pub fn run() {
     let input = read_file(6).expect("Couldn't read file");
     println!(
         "Day 6, part 1 - {}",
-        pt1_calculate(input.clone(), 4).unwrap()
+        return_first_distinct_with_buffer_size(input.clone(), 4).unwrap()
     );
-    //println!("Day 6, part 2 - {}", pt2_calculate(input.clone()));
+    println!(
+        "Day 6, part 2 - {}",
+        return_first_distinct_with_buffer_size(input.clone(), 14).unwrap()
+    );
 }
 
 fn buffer_contains_four_unique_chars(buffer: &VecDeque<char>, buffer_size: usize) -> bool {
@@ -25,7 +28,7 @@ fn buffer_contains_four_unique_chars(buffer: &VecDeque<char>, buffer_size: usize
     hash_map.len() == buffer_size
 }
 
-fn pt1_calculate(input: String, buffer_size: usize) -> Option<usize> {
+fn return_first_distinct_with_buffer_size(input: String, buffer_size: usize) -> Option<usize> {
     // how to use a VecDeque with a fixes size?
     let mut input_chars = input.chars();
     let mut buffer = VecDeque::new();
@@ -63,9 +66,9 @@ mod tests {
         let example_3 = "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg".to_string(); // after 10 chars
         let example_4 = "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw".to_string(); // after 11 chars
 
-        assert_eq!(Some(5), pt1_calculate(example_1, 4));
-        assert_eq!(Some(6), pt1_calculate(example_2, 4));
-        assert_eq!(Some(10), pt1_calculate(example_3, 4));
-        assert_eq!(Some(11), pt1_calculate(example_4, 4));
+        assert_eq!(Some(5), return_first_distinct_with_buffer_size(example_1, 4));
+        assert_eq!(Some(6), return_first_distinct_with_buffer_size(example_2, 4));
+        assert_eq!(Some(10), return_first_distinct_with_buffer_size(example_3, 4));
+        assert_eq!(Some(11), return_first_distinct_with_buffer_size(example_4, 4));
     }
 }
