@@ -3,162 +3,167 @@ use super::super::read_file;
 pub fn run() {
     let input = read_file(8).expect("Couldn't read file");
 
-    // calling with 9 piles because that is known
-    println!("Day 8, part 1 - {}", calculate_part1(input));
+    let (visible_trees, max_scenic_score) = calculate(input);
+    println!("Day 8, part 1 - {}", visible_trees);
+    println!("Day 8, part 1 - {}", max_scenic_score);
+
     // println!("Day 8, part 2 - {}", calculate());
 }
 
 #[derive(Debug)]
 struct Trees {
-    matrix: Vec<Vec<u32>>,
-    number_rows: u32,
-    number_colums: u32,
-    visible_trees: u32,
-    trees_already_checked_for_visibility: Vec<(u32, u32)>,
-    actual_tree: (u32, u32),
+    map_of_trees: Vec<Vec<u32>>,
+    map_rows_size: u32,
+    map_colums_size: u32,
+    total_visible_trees: u32,
+    trees_already_checked: Vec<(u32, u32)>,
+    current_tree: Option<(u32, u32)>,
+    max_scenic_score: u32, // row, col, score
 }
 
 impl Trees {
     fn from_string(input: String) -> Self {
-
         let mut matrix: Vec<Vec<u32>> = Vec::new();
         let input_as_vec_of_lines: Vec<&str> = input.lines().collect();
-    
-        for line in input_as_vec_of_lines {
 
+        for line in input_as_vec_of_lines {
             let mut tree_column: Vec<u32> = Vec::new();
 
             for tree in line.chars() {
-                 tree_column.push(tree.to_digit(10).unwrap());
-       
+                tree_column.push(tree.to_digit(10).unwrap());
             }
             matrix.push(tree_column);
-        }  
+        }
 
         let number_of_rows = matrix.len() as u32;
         let number_of_colums = matrix[0].len() as u32;
 
-        return Trees { 
-            matrix: matrix, 
-            number_rows: number_of_rows, 
-            number_colums: number_of_colums, 
-            visible_trees: 0, 
-            trees_already_checked_for_visibility: vec![], 
-            actual_tree: (0, 0),
+        Trees {
+            map_of_trees: matrix,
+            map_rows_size: number_of_rows,
+            map_colums_size: number_of_colums,
+            total_visible_trees: 0,
+            trees_already_checked: vec![],
+            current_tree: None,
+            max_scenic_score: 0,
         }
-
     }
 
     fn next_tree(&mut self) -> Option<(u32, u32)> {
-        let (r, c) = self.actual_tree;
-        if c < self.number_colums - 1 {
-            self.actual_tree = (r, c + 1 );
-            Some(self.actual_tree)
-        } else if r < self.number_rows - 1 {
-            self.actual_tree = (r + 1, 0);
-            Some(self.actual_tree)
-            
+        // iterate through all trees from per row from left to right 
+        
+        // updating self.current_tree to next tree and then return self.current_tree
+        if let Some((r, c)) = self.current_tree {
+            if c < self.map_colums_size - 1 {
+                self.current_tree = Some((r, c + 1));
+            } else if r < self.map_rows_size - 1 {
+                self.current_tree = Some((r + 1, 0));
+            } else {
+                return None;
+            }
         } else {
-            None
+            self.current_tree = Some((0, 0));
         }
+        self.current_tree
     }
 
-    fn tree_height(&self, given_tree: (u32, u32)) -> u32 {
-        let (r, c ) = given_tree;
-        self.matrix[r as usize][c as usize]
+    fn height_of_tree(&self, tree: (u32, u32)) -> u32 {
+        let (r, c) = tree;
+        self.map_of_trees[r as usize][c as usize]
     }
 
+    fn visibility_and_score_of_actual_tree(&self) -> (bool, u32) {
+        // checks if tree is visible from any direction, calculating score and returning both
 
-    fn check_tree_for_visibility(&mut self) -> bool {
-        // checks if tree is visible from any direction 
-       
-        // adding tree to the trees_already_checked_for_visibility vector
-        self.trees_already_checked_for_visibility.push(self.actual_tree);
+        let (r, c) = self.current_tree.unwrap();
+        let own_height = self.height_of_tree(self.current_tree.unwrap());
 
-        let (r, c ) = self.actual_tree;
-        let own_height = self.tree_height(self.actual_tree);
-  
-        let mut west = true; 
-        let mut east = true; 
-        let mut north = true; 
-        let mut south = true; 
+        let mut west_visibility = true;
+        let mut east_visibility = true;
+        let mut north_visibility = true;
+        let mut south_visibility = true;
 
-        for west_tree in 0..c {
-            let foreign_tree =  (r, west_tree);
-            let foreign_height = self.tree_height(foreign_tree);
-            
+        let mut west_visible_trees: u32 = 0;
+        let mut east_visible_trees: u32 = 0;
+        let mut north_visbile_trees: u32 = 0;
+        let mut south_visible_trees: u32 = 0;
+
+        // iterating reversed here!
+        for west_tree in (0..c).rev() {
+            let foreign_tree = (r, west_tree);
+            let foreign_height = self.height_of_tree(foreign_tree);
+
             if foreign_height >= own_height {
-                west = false;
+                west_visible_trees = c - west_tree;
+                west_visibility = false;
                 break;
-            } 
+            } else {
+                west_visible_trees = c;
+            }
         }
 
-        
-        for east_tree in c+1..self.number_colums {
-            let foreign_tree =  (r, east_tree);
-            if self.tree_height(foreign_tree) >= own_height {
-                east = false;
+        for east_tree in c + 1..self.map_colums_size {
+            let foreign_tree = (r, east_tree);
+            if self.height_of_tree(foreign_tree) >= own_height {
+                east_visible_trees = east_tree - c;
+                east_visibility = false;
                 break;
-            } 
+            } else {
+                east_visible_trees = self.map_colums_size - 1 - c;
+            }
         }
 
-        
-        for north_tree in 0..r {
-            let foreign_tree =  (north_tree, c);
-            if self.tree_height(foreign_tree) >= own_height {
-                north = false;
+        // iterating reversed here!
+        for north_tree in (0..r).rev() {
+            let foreign_tree = (north_tree, c);
+            if self.height_of_tree(foreign_tree) >= own_height {
+                north_visbile_trees = r - north_tree;
+                north_visibility = false;
                 break;
-            } 
+            } else {
+                north_visbile_trees = r;
+            }
         }
 
-        for south_tree in r+1..self.number_rows {
-            let foreign_tree =  (south_tree, c);
-            if self.tree_height(foreign_tree) >= own_height {
-                south = false;
+        for south_tree in r + 1..self.map_rows_size {
+            let foreign_tree = (south_tree, c);
+            if self.height_of_tree(foreign_tree) >= own_height {
+                south_visible_trees = south_tree - r;
+                south_visibility = false;
                 break;
-            } 
-        }
-        
-
-        // return if any is true
-        if west || east || north || south {
-            true
-        } else {
-            false
+            } else {
+                south_visible_trees = self.map_rows_size - 1 - r;
+            }
         }
 
-    
+        // results
+        let visibility = west_visibility || east_visibility || north_visibility || south_visibility;
+        let score = west_visible_trees * east_visible_trees * north_visbile_trees * south_visible_trees;
+        (visibility, score)
     }
-
 }
 
-
-
-fn calculate_part1(input: String) -> u32 {
+fn calculate(input: String) -> (u32, u32) {
     let mut trees = Trees::from_string(input);
-    
-    // starting with 1 because tree.actual_tree is visible (edge!)
-    trees.visible_trees =  1; 
-    trees.trees_already_checked_for_visibility.push(trees.actual_tree);
 
-    loop {
-        if let Some(_) = trees.next_tree() {
-            if !trees.trees_already_checked_for_visibility.contains(&trees.actual_tree) {
-                if trees.check_tree_for_visibility() {
-                    trees.visible_trees += 1;
-                }
-            } 
-        } else {
-            break;
+    while trees.next_tree().is_some() {
+        if !trees.trees_already_checked.contains(&trees.current_tree.unwrap()) {
+            let (visibility, score) = trees.visibility_and_score_of_actual_tree();
+            if visibility {
+                trees.total_visible_trees += 1;
+            }
+            if score > trees.max_scenic_score {
+                trees.max_scenic_score = score;
+            }
+
+            // adding tree to the trees_already_checked_for_visibility vector
+            trees.trees_already_checked.push(trees.current_tree.unwrap());
         }
+        
     }
 
-    trees.visible_trees    
+    (trees.total_visible_trees, trees.max_scenic_score)
 }
-
-
-
-
 
 #[cfg(test)]
 mod tests {
@@ -170,50 +175,75 @@ mod tests {
 
     impl Input {
         fn new() -> Self {
-            Input { input: "30373
+            Input {
+                input: "30373
 25512
 65332
 33549
-35390".to_string() }
+35390"
+                    .to_string(),
+            }
         }
-        
     }
 
-
     #[test]
-    fn day_8_p1() {
+    fn day_8_test_results() {
         let input = Input::new();
-        assert_eq!(21, calculate_part1(input.input));
+        assert_eq!(21, calculate(input.input.clone()).0);
+        assert_eq!(8, calculate(input.input.clone()).1);
     }
 
     #[test]
-    fn day_8_internal_next_tree() {
+    fn day_8_internal_next() {
         let input = Input::new();
         let mut trees = Trees::from_string(input.input);
 
-        assert_eq!(Some((0,1)), trees.next_tree());
-        assert_eq!(Some((0,2)), trees.next_tree());
-        assert_eq!(Some((0,3)), trees.next_tree());
-        assert_eq!(Some((0,4)), trees.next_tree());
-        assert_eq!(Some((1,0)), trees.next_tree());
-
-        trees.actual_tree = (0, 1);
-        assert_eq!(true, trees.check_tree_for_visibility());
-
-        trees.actual_tree = (1, 4);
-        assert_eq!(true, trees.check_tree_for_visibility());
-
-        // muss (1, 1) sein
-        trees.actual_tree = (1, 1);
-        assert_eq!(true, trees.check_tree_for_visibility());
-        
-        trees.actual_tree = (1, 3);
-        assert_eq!(false, trees.check_tree_for_visibility());
-        
-        trees.actual_tree = (2, 1);
-        assert_eq!(true, trees.check_tree_for_visibility());
-
+        assert_eq!(Some((0, 0)), trees.next_tree());
+        assert_eq!(Some((0, 1)), trees.next_tree());
+        assert_eq!(Some((0, 2)), trees.next_tree());
+        assert_eq!(Some((0, 3)), trees.next_tree());
+        assert_eq!(Some((0, 4)), trees.next_tree());
+        assert_eq!(Some((1, 0)), trees.next_tree());
     }
 
-    
+    #[test]
+    fn day_8_internal_visibility() {
+        let input = Input::new();
+        let mut trees = Trees::from_string(input.input);
+
+        trees.current_tree = Some((0, 1));
+        assert_eq!(true, trees.visibility_and_score_of_actual_tree().0);
+
+        trees.current_tree = Some((1, 4));
+        assert_eq!(true, trees.visibility_and_score_of_actual_tree().0);
+
+        trees.current_tree = Some((1, 1));
+        assert_eq!(true, trees.visibility_and_score_of_actual_tree().0);
+        trees.current_tree = Some((1, 3));
+        assert_eq!(false, trees.visibility_and_score_of_actual_tree().0);
+
+        trees.current_tree = Some((2, 1));
+        assert_eq!(true, trees.visibility_and_score_of_actual_tree().0);
+    }
+
+    #[test]
+    fn day_8_internal_score() {
+        let input = Input::new();
+        let mut trees = Trees::from_string(input.input);
+
+        trees.current_tree = Some((1, 2));
+        assert_eq!(4, trees.visibility_and_score_of_actual_tree().1);
+
+        trees.current_tree = Some((3, 2));
+        assert_eq!(8, trees.visibility_and_score_of_actual_tree().1);
+
+        trees.current_tree = Some((2, 4));
+        assert_eq!(0, trees.visibility_and_score_of_actual_tree().1);
+
+        trees.current_tree = Some((4, 4));
+        assert_eq!(0, trees.visibility_and_score_of_actual_tree().1);
+
+        trees.current_tree = Some((0, 0));
+        assert_eq!(0, trees.visibility_and_score_of_actual_tree().1);
+    }
 }
