@@ -3,11 +3,11 @@ use super::super::read_file;
 pub fn run() {
     let input = read_file(8).expect("Couldn't read file");
 
-    let (visible_trees, max_scenic_score) = calculate(input);
-    println!("Day 8, part 1 - {}", visible_trees);
-    println!("Day 8, part 1 - {}", max_scenic_score);
+    let mut trees = Trees::from_string(input);
+    trees.compute_self();
 
-    // println!("Day 8, part 2 - {}", calculate());
+    println!("Day 8, part 1 - {}", trees.total_visible_trees);
+    println!("Day 8, part 1 - {}", trees.max_scenic_score);
 }
 
 #[derive(Debug)]
@@ -49,9 +49,31 @@ impl Trees {
         }
     }
 
+    fn compute_self(&mut self) {
+        // calculating total visible trees and max scencic score
+
+        while self.next_tree().is_some() {
+            if !self
+                .trees_already_checked
+                .contains(&self.current_tree.unwrap())
+            {
+                let (visibility, score) = self.visibility_and_score_of_actual_tree();
+                if visibility {
+                    self.total_visible_trees += 1;
+                }
+                if score > self.max_scenic_score {
+                    self.max_scenic_score = score;
+                }
+
+                // adding tree to the trees_already_checked_for_visibility vector
+                self.trees_already_checked.push(self.current_tree.unwrap());
+            }
+        }
+    }
+
     fn next_tree(&mut self) -> Option<(u32, u32)> {
-        // iterate through all trees from per row from left to right 
-        
+        // iterate through all trees from per row from left to right
+
         // updating self.current_tree to next tree and then return self.current_tree
         if let Some((r, c)) = self.current_tree {
             if c < self.map_colums_size - 1 {
@@ -138,31 +160,10 @@ impl Trees {
 
         // results
         let visibility = west_visibility || east_visibility || north_visibility || south_visibility;
-        let score = west_visible_trees * east_visible_trees * north_visbile_trees * south_visible_trees;
+        let score =
+            west_visible_trees * east_visible_trees * north_visbile_trees * south_visible_trees;
         (visibility, score)
     }
-}
-
-fn calculate(input: String) -> (u32, u32) {
-    let mut trees = Trees::from_string(input);
-
-    while trees.next_tree().is_some() {
-        if !trees.trees_already_checked.contains(&trees.current_tree.unwrap()) {
-            let (visibility, score) = trees.visibility_and_score_of_actual_tree();
-            if visibility {
-                trees.total_visible_trees += 1;
-            }
-            if score > trees.max_scenic_score {
-                trees.max_scenic_score = score;
-            }
-
-            // adding tree to the trees_already_checked_for_visibility vector
-            trees.trees_already_checked.push(trees.current_tree.unwrap());
-        }
-        
-    }
-
-    (trees.total_visible_trees, trees.max_scenic_score)
 }
 
 #[cfg(test)]
@@ -189,8 +190,11 @@ mod tests {
     #[test]
     fn day_8_test_results() {
         let input = Input::new();
-        assert_eq!(21, calculate(input.input.clone()).0);
-        assert_eq!(8, calculate(input.input.clone()).1);
+        let mut trees = Trees::from_string(input.input);
+        trees.compute_self();
+
+        assert_eq!(21, trees.total_visible_trees);
+        assert_eq!(8, trees.max_scenic_score);
     }
 
     #[test]
