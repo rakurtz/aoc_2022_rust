@@ -40,16 +40,15 @@ impl Rope {
     }
 
     fn parse_and_execute_string_command(&mut self, line: String) {
-        let splitted: Vec<&str> = line.split_whitespace().collect();
-        let command = splitted[0];
-        let count = splitted[1].parse::<u32>().unwrap();
-        let command = match command {
+        let mut splitted = line.split_whitespace();
+        let command = match splitted.next().unwrap() {
             "U" => Direction::UP,
             "D" => Direction::DOWN,
             "R" => Direction::RIGHT,
             "L" => Direction::LEFT,
             _ => panic!(),
         };
+        let count = splitted.next().unwrap().parse::<u32>().unwrap();
 
         for _ in 0..count {
             self.move_one(&command);
