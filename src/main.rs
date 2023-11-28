@@ -1,7 +1,7 @@
 // Advent of Code 2022 in Rust
 use std::env;
 
-const USAGE: &str = "\nNo argument given, which day's exercise to run.
+const USAGE: &str = "\nNo argument given, what day's exercise to run.
 Usage: e.g. `cargo run --1` for day 1\n";
 
 fn main() {
@@ -17,6 +17,7 @@ fn main() {
             Ok(6) => aoc_2022::solutions::day6::run(),
             Ok(7) => aoc_2022::solutions::day7::run(),
             Ok(8) => aoc_2022::solutions::day8::run(),
+            Ok(9) => aoc_2022::solutions::day9::run(),
 
             _ => println!("{}", USAGE),
         }

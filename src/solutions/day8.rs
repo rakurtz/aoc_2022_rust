@@ -18,7 +18,7 @@ struct Trees {
     total_visible_trees: u32,
     trees_already_checked: Vec<(u32, u32)>,
     current_tree: Option<(u32, u32)>, // Option because i want to start from None to make next() beginn with (0, 0)
-    max_scenic_score: u32, 
+    max_scenic_score: u32,
 }
 
 impl Trees {
