@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::{thread, time};
 
 use super::super::read_file;
 
@@ -12,11 +11,12 @@ pub fn run() {
         rope_part1.parse_and_execute_string_command(String::from(line));
     }
 
+    // Part 2
     let mut rope_part2 = Rope::new(10);
     for line in input.clone().lines() {
         rope_part2.parse_and_execute_string_command(String::from(line));
     }
-
+    
     println!("Day 9, part 1 - {}", rope_part1.visited_by_tail.len());
     println!("Day 9, part 2 - {}", rope_part2.visited_by_tail.len());
 }
@@ -57,34 +57,6 @@ impl Rope {
         }
     }
 
-    // fn print_grid(&self) {
-    //     let normalizer = 0;
-    //     let mut normalized_vec = Vec::new();
-
-    //     if !self.knots.len() == 10 {
-    //         panic!();
-    //     }
-
-    //     // normalize points to 0 by shifting
-    //     for knot in self.knots.clone() {
-    //         let nx = knot.x + normalizer;
-    //         let ny = knot.y + normalizer;
-    //         normalized_vec.push((nx, ny));
-    //     }
-
-    //     // print at position
-    //     for (x, y) in normalized_vec.clone() {
-    //         let x = x - 1;
-    //         print!("{esc}[{x};{y}H", esc = 27 as char);
-    //         print!("#");
-    //     }
-
-    //     let millis = time::Duration::from_millis(50);
-    //     thread::sleep(millis);
-
-    //     // send clear command
-    //     print!("{}[2J", 27 as char);
-    // }
 
     fn parse_and_execute_string_command(&mut self, line: String) {
         let mut splitted = line.split_whitespace();
@@ -133,36 +105,36 @@ impl Rope {
     }
 
     fn move_knot(&mut self, position: usize) {
-        let front_knot = self.knots.get(position - 1).unwrap().clone();
-        let last_knot = self.knots.len() - 1; // needed to do this up here befor self.knots get borrowed :/
-
+        
+        let last_knot_index = self.knots.len() - 1; // needed to do this up here befor self.knots get borrowed :/
+        
+        let front_knot = self.knots[position-1];
         let knot = &mut self.knots[position];
 
         let x_difference = knot.x - front_knot.x;
         let y_difference = knot.y - front_knot.y;
 
         if x_difference.abs() >= 2 {
-            knot.y = front_knot.y; // correct in case, maybe no change though
-            if front_knot.x > knot.x {
-                // front_knot is on the right
+            knot.y = front_knot.y;              // safe in any case, maybe no change though
+                        
+            if front_knot.x > knot.x {          // front_knot is on the right
                 knot.x = front_knot.x - 1;
-            } else {
-                // front_knot is on the left
+            } else {                            // front_knot is on the left
                 knot.x = front_knot.x + 1;
             }
+
         } else if y_difference.abs() >= 2 {
-            knot.x = front_knot.x; // correct in case, maybe no change though
-            if front_knot.y > knot.y {
-                // front_knot is on the up
+            knot.x = front_knot.x;              // safe in any case, maybe no change though
+            
+            if front_knot.y > knot.y {          // front_knot is on the up
                 knot.y = front_knot.y - 1;
-            } else {
-                // front_knot is on below
+            } else {                            // front_knot is on below
                 knot.y = front_knot.y + 1;
             }
         }
 
-        // adding the new position of last knot (tail) to hashmap
-        if position == last_knot {
+        // adding the new position only of last knot (tail) to hashmap
+        if position == last_knot_index {
             self.visited_by_tail.insert((knot.x, knot.y));
         }
     }
@@ -217,6 +189,22 @@ U 20"
 
         assert_eq!(13, visited);
     }
+    
+    #[test]
+    fn day_9_part2_with_testinput1() {
+        let input = Input::new();
+        let mut rope = Rope::new(10);
+
+        for line in input.input_1.lines() {
+            rope.parse_and_execute_string_command(String::from(line));
+            // rope.parse_and_execute_string_command(String::from(line));
+        }
+
+        let visited = rope.visited_by_tail.len();
+        println!("visited: {}", visited);
+        dbg!(&rope.knots);
+        assert_eq!(1, visited);
+    }
 
     #[test]
     fn day_9_part2() {
@@ -230,7 +218,8 @@ U 20"
 
         let visited = rope.visited_by_tail.len();
         println!("visited: {}", visited);
-
+        dbg!(&rope.knots);
         assert_eq!(36, visited);
     }
+
 }
